@@ -1,10 +1,12 @@
+/// <reference path="D:\asr-ts-autosplitter\node_modules\assemblyscript\std\types\assembly\index.d.ts"/>
+
 import * as Process from './process';
 
 export class MemoryWatcher<T> {
     /**  Current value of the watcher. */
-    current: number;
+    current: T;
     /**  The value of the watcher from the previous update cycle. */
-    old: number;
+    old: T;
     protected type: string;
     protected module: string;
     protected address: Process.Address;
@@ -30,7 +32,7 @@ export class MemoryWatcher<T> {
         this.old = this.current;
         let changed = false;
         let bufferSize = 4; // default 4 bytes of buffer
-        let baseAddress = Process.getModuleAddress(processId, this.module);
+        const baseAddress = Process.getModuleAddress(processId, this.module);
 
         // Set the buffer size depending on the type
         // AssemblyScript doesn't support switch cases on strings yet, so good ol' if chain it is
@@ -52,7 +54,7 @@ export class MemoryWatcher<T> {
             if (this.current != value) {
                 changed = true;
             }
-            this.current = value;
+            this.current = (value as T);
         }
 
         return changed;
@@ -80,15 +82,15 @@ export class StringWatcher {
     /**
      * Creates a watcher with the specified type.
      * @param moduleName Name of the module to read from.
+     * @param address Relative base address to use.
      * @param length The length of the string.
      * @param useUTF16 Decode the string as UTF-16. Defaults to `false`.
-     * @param address Relative base address to use.
      * @returns {StringWatcher} The instance of a memory watcher with the specified parameters.
      */
-    constructor(moduleName: string, length: u32, address: Process.Address, useUTF16: bool = false) {
-        this.length = length;
+    constructor(moduleName: string, address: Process.Address, length: u32, useUTF16: bool = false) {
         this.module = moduleName;
         this.address = address;
+        this.length = length;
         this.useUTF16 = useUTF16;
     }
 
@@ -100,8 +102,8 @@ export class StringWatcher {
     update(processId: Process.ProcessId): bool {
         this.old = this.current;
         let changed = false;
-        const bufferSize = this.length * 4;
-        let baseAddress = Process.getModuleAddress(processId, this.module);
+        const bufferSize = this.length;
+        const baseAddress = Process.getModuleAddress(processId, this.module);
 
         const buf = new ArrayBuffer(bufferSize);
 
@@ -110,7 +112,7 @@ export class StringWatcher {
             if (this.useUTF16) {
                 value = String.UTF16.decode(buf);
             } else {
-                value = String.UTF8.decode(buf);
+                value = String.UTF8.decode(buf, true);
             }
 
             if (value != this.current) {
