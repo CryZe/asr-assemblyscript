@@ -509,11 +509,13 @@ export class F64Watcher extends Watcher<f64> {
     }
 }
 
-export class StringWatcher extends Watcher<string> {
+export class StringWatcher {
     /**  Current value of the watcher. */
     current: string = "";
     /**  The value of the watcher from the previous update cycle. */
     old: string = "";
+    protected module: string;
+    protected address: Process.Address;
     protected length: u32;
     protected useUTF16: bool;
 
@@ -526,7 +528,8 @@ export class StringWatcher extends Watcher<string> {
      * @returns {Watcher<string>} The instance of a memory watcher of type `string` with the specified parameters.
      */
     constructor(moduleName: string, address: Process.Address, length: u32, useUTF16: bool = false) {
-        super(moduleName, address);
+        this.module = moduleName;
+        this.address = address;
         this.length = length;
         this.useUTF16 = useUTF16;
     }
