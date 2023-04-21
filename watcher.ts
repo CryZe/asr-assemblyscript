@@ -1,5 +1,3 @@
-/// <reference path="D:\asr-ts-autosplitter\node_modules\assemblyscript\std\types\assembly\index.d.ts"/>
-
 import * as Process from './process';
 
 class Watcher<T> {
